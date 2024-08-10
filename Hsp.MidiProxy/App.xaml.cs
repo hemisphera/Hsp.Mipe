@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using CommandLine;
 using Eos.Mvvm;
 using Eos.Mvvm.DataTemplates;
 using Eos.Mvvm.EventArgs;
@@ -20,18 +21,8 @@ public partial class App : Application
 
   protected override void OnStartup(StartupEventArgs e)
   {
-    Configuration.Configuration.Instance.Load();
-    foreach (var pipe in Configuration.Configuration.Instance.Items)
-    {
-      try
-      {
-        MidiProxy.Main.Instance.Items.Add(new MidiPipeModel(pipe.InputDeviceName, pipe.OutputDeviceName));
-      }
-      catch (Exception ex)
-      {
-        // ignore
-      }
-    }
+    Arguments.Instance = Parser.Default.ParseArguments<Arguments>(e.Args).Value;
+    _ = MidiProxy.Main.Instance.Refresh();
   }
 
   protected override void OnExit(ExitEventArgs e)
