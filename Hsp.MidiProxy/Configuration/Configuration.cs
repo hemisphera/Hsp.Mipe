@@ -14,7 +14,9 @@ public class Configuration
   public static Configuration Instance { get; } = new();
 
 
-  public List<ConfiguredPipe> Items { get; set; }
+  public List<ConfiguredPipe> Items { get; set; } = new();
+  
+  public bool EnableLogging { get; set; }
 
 
   private Configuration()

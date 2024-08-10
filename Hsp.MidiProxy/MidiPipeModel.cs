@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Windows.Shapes;
 using Eos.Mvvm;
 using Eos.Mvvm.Commands;
 using Hsp.Midi;
@@ -13,10 +11,12 @@ namespace Hsp.MidiProxy;
 
 public class MidiPipeModel : ViewModelBase
 {
-  public string RequestedInputDeviceName { get; }
-  public string RequesteOutputDeviceName { get; }
+  public string RequestedInputDeviceName { get; init; }
+  public string RequesteOutputDeviceName { get; init; }
 
   private MidiPipe _pipe;
+
+  private readonly object _syncRoot = new();
 
   public bool IsOpen
   {
@@ -61,36 +61,46 @@ public class MidiPipeModel : ViewModelBase
   public event EventHandler<IMidiMessage> MessageReceived;
 
 
-  public MidiPipeModel()
-    : this(null, null)
+  private MidiPipeModel()
   {
   }
 
-  public MidiPipeModel(string requestedInputDeviceName, string requesteOutputDeviceName)
-  {
-    RequestedInputDeviceName = requestedInputDeviceName;
-    RequesteOutputDeviceName = requesteOutputDeviceName;
 
-    Task.Run(async () =>
+  public static async Task<MidiPipeModel> Create(string requestedInputDeviceName = null, string requesteOutputDeviceName = null)
+  {
+    var instance = new MidiPipeModel
     {
-      await InputDevices.Refresh();
-      await OutputDevices.Refresh();
-      InputDevices.SelectedItem = InputDevices.FirstOrDefault(d => d.Name == RequestedInputDeviceName);
-      OutputDevices.SelectedItem = OutputDevices.FirstOrDefault(d => d.Name == RequesteOutputDeviceName);
-    });
+      RequestedInputDeviceName = requestedInputDeviceName,
+      RequesteOutputDeviceName = requesteOutputDeviceName
+    };
+    await instance.LoadDevices();
+    return instance;
+  }
+
+
+  private async Task LoadDevices()
+  {
+    await Task.WhenAll(
+      InputDevices.Refresh(),
+      OutputDevices.Refresh()
+    );
+    InputDevices.SelectedItem = InputDevices.FirstOrDefault(d => d.Name == RequestedInputDeviceName);
+    OutputDevices.SelectedItem = OutputDevices.FirstOrDefault(d => d.Name == RequesteOutputDeviceName);
   }
 
 
   private void PipeOnMessageReceived(object sender, IMidiMessage e)
   {
     MessageReceived?.Invoke(this, e);
-    WriteMidiLog(e);
+    if (!Configuration.Configuration.Instance.EnableLogging) return;
+    lock (_syncRoot)
+      WriteMidiLog(e);
   }
 
   private void WriteMidiLog(IMidiMessage midiMessage)
   {
     if (midiMessage is ChannelMessage cm && (cm.Channel > 0 || cm.Command == ChannelCommand.Controller)) return;
-    var path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "MidiLog.txt");
+    var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "MidiLog.txt");
     var line = new[]
     {
       DateTime.Now.ToLongTimeString(),
@@ -131,7 +141,6 @@ public class MidiPipeModel : ViewModelBase
     if (InputDevices.SelectedItem == null || OutputDevices.SelectedItem == null) return;
     _pipe = new MidiPipe(InputDevices.SelectedItem.Name, OutputDevices.SelectedItem.Name);
     _pipe.MessageReceived += PipeOnMessageReceived;
-    _pipe.Open();
     IsOpen = true;
   }
 

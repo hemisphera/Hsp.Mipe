@@ -20,9 +20,9 @@ public class MidiDeviceList : AsyncItemsViewModelBase<MidiDeviceInfo>
   protected override async Task<IEnumerable<MidiDeviceInfo>> GetItems()
   {
     if (Input)
-      return await Task.FromResult(InputMidiDevice.Enumerate());
+      return await Task.FromResult(InputMidiDevicePool.Instance.Enumerate());
     else
-      return await Task.FromResult(OutputMidiDevice.Enumerate());
+      return await Task.FromResult(OutputMidiDevicePool.Instance.Enumerate());
   }
 
 }
