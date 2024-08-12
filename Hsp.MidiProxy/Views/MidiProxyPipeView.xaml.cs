@@ -1,22 +1,20 @@
-﻿using Hsp.Midi.Messages;
-using System;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Hsp.Midi;
+using Hsp.Midi.Messages;
 
-namespace Hsp.MidiProxy;
+namespace Hsp.MidiProxy.Views;
 
 /// <summary>
 /// Interaction logic for MidiPipeModelView.xaml
 /// </summary>
-public partial class MidiPipeModelView : UserControl
+public partial class MidiProxyPipeView : UserControl
 {
+  public MidiProxyPipeList ViewModel => (MidiProxyPipeList)DataContext;
 
-  public Main ViewModel => (Main)DataContext;
 
-
-  public MidiPipeModelView()
+  public MidiProxyPipeView()
   {
     InitializeComponent();
     this.DataContextChanged += MidiPipeModelView_DataContextChanged;
@@ -24,8 +22,8 @@ public partial class MidiPipeModelView : UserControl
 
   private void MidiPipeModelView_DataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
   {
-    if (e.NewValue is MidiPipeModel nm) nm.MessageReceived += Nm_MessageReceived;
-    if (e.OldValue is MidiPipeModel om) om.MessageReceived -= Nm_MessageReceived;
+    if (e.NewValue is MidiProxyPipe nm) nm.MessageReceived += Nm_MessageReceived;
+    if (e.OldValue is MidiProxyPipe om) om.MessageReceived -= Nm_MessageReceived;
   }
 
   private void Nm_MessageReceived(object sender, IMidiMessage e)
@@ -39,5 +37,4 @@ public partial class MidiPipeModelView : UserControl
     if (targetLed is null) return;
     Dispatcher.Invoke(() => (FindResource("sb") as Storyboard)?.Begin(targetLed));
   }
-
 }

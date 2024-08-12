@@ -6,22 +6,11 @@
         xmlns:local="clr-namespace:Hsp.MidiProxy"
         xmlns:mvvm="clr-namespace:Eos.Mvvm;assembly=Eos.Mvvm"
         mc:Ignorable="d"
-        d:DataContext="{x:Static local:Main.Instance}"
+        d:DataContext="{x:Static local:ContentHost.Instance}"
         Title="MIDIProxy" Height="600" Width="700" FontSize="15" FontFamily="Segoe UI">
 
-  <DockPanel>
-
-    <UniformGrid Columns="3" DockPanel.Dock="Top" Height="50">
-      <Button Command="{Binding Path=AddCommand}" Content="+" />
-      <Button Command="{Binding Path=ConnectAllCommand}" Content="I" Foreground="ForestGreen" />
-      <Button Command="{Binding Path=DisconnectAllCommand}" Content="O" Foreground="Orange" />
-    </UniformGrid>
-
-    <ItemsControl ItemsSource="{Binding Path=Items}"
-              HorizontalContentAlignment="Stretch"
-              ItemTemplateSelector="{x:Static mvvm:UiSettings.ViewLocator}">
-    </ItemsControl>
-
-  </DockPanel>
+    <ContentControl
+        Content="{Binding Path=Content}"
+        ContentTemplateSelector="{x:Static mvvm:UiSettings.ViewLocator}" />
 
 </Window>

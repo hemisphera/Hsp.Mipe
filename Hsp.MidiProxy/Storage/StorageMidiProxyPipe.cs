@@ -1,10 +1,8 @@
-﻿namespace Hsp.MidiProxy.Configuration;
+﻿namespace Hsp.MidiProxy.Storage;
 
-public class ConfiguredPipe
+public class StorageMidiProxyPipe
 {
-  
   public string InputDeviceName { get; set; }
-  
+
   public string OutputDeviceName { get; set; }
-  
 }
