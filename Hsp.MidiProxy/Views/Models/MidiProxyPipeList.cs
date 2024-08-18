@@ -76,6 +76,7 @@ public sealed class MidiProxyPipeList : MappedAsyncItemsViewModelBase<StorageMid
 
   public async Task Initialize(Arguments args)
   {
+    await Task.Delay(TimeSpan.FromSeconds(2));
     await Task.WhenAll(
       MidiDeviceList.OutputDevices.Refresh(),
       MidiDeviceList.InputDevices.Refresh()
