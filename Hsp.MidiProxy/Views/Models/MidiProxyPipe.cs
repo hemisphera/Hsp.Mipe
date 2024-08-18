@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Windows.Input;
 using Eos.Mvvm;
 using Hsp.Midi;
 using Hsp.Midi.Messages;
@@ -35,7 +33,7 @@ public class MidiProxyPipe : ViewModelBase
     }
   }
 
-  private MidiPipe _pipe;
+  public MidiPipe Pipe { get; private set; }
 
   private readonly object _syncRoot = new();
 
@@ -76,21 +74,7 @@ public class MidiProxyPipe : ViewModelBase
   private void PipeOnMessageReceived(object sender, IMidiMessage e)
   {
     MessageReceived?.Invoke(this, e);
-    if (!Configuration.Instance.EnableLogging) return;
-    lock (_syncRoot)
-      WriteMidiLog(e);
-  }
-
-  private static void WriteMidiLog(IMidiMessage midiMessage)
-  {
-    if (midiMessage is ChannelMessage cm && (cm.Channel > 0 || cm.Command == ChannelCommand.Controller)) return;
-    var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "MidiLog.txt");
-    var line = new[]
-    {
-      DateTime.Now.ToLongTimeString(),
-      midiMessage.ToString()
-    };
-    File.AppendAllText(path, string.Join("\t", line) + Environment.NewLine);
+    Logger.WriteLog(e);
   }
 
   public void Test()
@@ -102,8 +86,8 @@ public class MidiProxyPipe : ViewModelBase
   {
     if (overdub)
       SetShift(true);
-    _pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOn, 0, 92, 127));
-    _pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOff, 0, 92));
+    Pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOn, 0, 92, 127));
+    Pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOff, 0, 92));
     if (overdub)
       SetShift(false);
   }
@@ -111,11 +95,11 @@ public class MidiProxyPipe : ViewModelBase
   private void SetShift(bool b)
   {
     if (b)
-      _pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOn, 0, 120, 127));
+      Pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOn, 0, 120, 127));
     else
     {
-      _pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOff, 0, 120));
-      _pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOn, 0, 75, 1));
+      Pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOff, 0, 120));
+      Pipe.OutputMidiDevice.Send(new ChannelMessage(ChannelCommand.NoteOn, 0, 75, 1));
     }
   }
 
@@ -125,9 +109,10 @@ public class MidiProxyPipe : ViewModelBase
     {
       if (IsOpen) return true;
       if (SelectedInputDevice == null || SelectedOutputDevice == null) return false;
-      _pipe = new MidiPipe(SelectedInputDevice.Name, SelectedOutputDevice.Name);
-      _pipe.MessageReceived += PipeOnMessageReceived;
+      Pipe = new MidiPipe(SelectedInputDevice.Name, SelectedOutputDevice.Name);
+      Pipe.MessageReceived += PipeOnMessageReceived;
       IsOpen = true;
+      Logger.WriteLog($"Connected pipe '{Pipe}'");
       return true;
     }
     catch
@@ -139,15 +124,16 @@ public class MidiProxyPipe : ViewModelBase
   public void Disconnect()
   {
     if (!IsOpen) return;
-    _pipe.MessageReceived -= PipeOnMessageReceived;
-    _pipe.Close();
-    _pipe = null;
+    Pipe.MessageReceived -= PipeOnMessageReceived;
+    Pipe.Close();
+    Logger.WriteLog($"Disconnected pipe '{Pipe}'");
+    Pipe = null;
     IsOpen = false;
   }
 
 
   public override string ToString()
   {
-    return _pipe?.ToString() ?? "Closed";
+    return Pipe?.ToString() ?? "Closed";
   }
 }

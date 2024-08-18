@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Eos.Mvvm;
 using Eos.Mvvm.Commands;
 using Hsp.Midi;
+using Hsp.Midi.Messages;
 using Hsp.MidiProxy.Storage;
+using Microsoft.VisualBasic.Logging;
 
 namespace Hsp.MidiProxy.Views;
 
@@ -81,7 +84,16 @@ public sealed class MidiProxyPipeList : MappedAsyncItemsViewModelBase<StorageMid
     Configuration.Instance.Load();
     ItemsAsMappedCollection?.UpdateFromSource();
 
+    Logger.WriteLog("Loading completed");
+
     if (args.AutoEnable)
       await ConnectAll();
+  }
+
+  public async Task SelectTrack(int trackNo)
+  {
+    Items[1].Pipe.Send(new ChannelMessage(ChannelCommand.NoteOn, 0, 100 + trackNo - 1, 127));
+    await Task.Delay(TimeSpan.FromMilliseconds(100));
+    Items[1].Pipe.Send(new ChannelMessage(ChannelCommand.NoteOff, 0, 100 + trackNo - 1, 0));
   }
 }
