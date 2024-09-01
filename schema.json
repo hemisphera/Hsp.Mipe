@@ -6,8 +6,18 @@
             "type": "string",
             "enum": [
                 "Output",
-                "NoteToCC"
+                "NoteToCC",
+                "Multiply",
+                "Filter"
             ]
+        },
+        "OutputChainItem": {
+            "type": "object",
+            "properties": {
+                "Port": {
+                    "type": "string"
+                }
+            }
         },
         "ChainItem": {
             "type": "object",
@@ -15,7 +25,21 @@
                 "Type": {
                     "$ref": "#/definitions/ChainItemType"
                 }
-            }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "Output"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/OutputChainItem"
+                    }
+                }
+            ]
         }
     },
     "type": "object",
@@ -46,7 +70,10 @@
                         "type": "string"
                     },
                     "Chain": {
-                        "type": "array"
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/ChainItem"
+                        }
                     }
                 }
             }
