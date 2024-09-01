@@ -1,0 +1,35 @@
+{
+    "$id": "https://raw.githubusercontent.com/EOS-Solutions/Defaults/master/Schemas/Gordon/v1/packagefeed.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "InputPorts": {
+            "type": "array",
+            "description": "A list of virtual input devices to create.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "OutputPorts": {
+            "type": "array",
+            "description": "A list of virtual output ports to create.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "Connections": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "InputPort": {
+                        "type": "string"
+                    },
+                    "OutputPort": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
