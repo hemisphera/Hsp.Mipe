@@ -12,7 +12,8 @@ public class MipeInstance
     Converters =
     {
       new MidiChainItemJsonConverter(),
-      new RangeJsonConverter()
+      new RangeJsonConverter(),
+      new JsonStringEnumConverter()
     }
   };
 
@@ -26,8 +27,14 @@ public class MipeInstance
   private ILogger? _logger;
 
 
+  /// <summary>
+  /// Specifies a list of virtual MIDI ports to create.
+  /// </summary>
   public string[]? VirtualPorts { get; set; }
 
+  /// <summary>
+  /// Specifies a list of MIDI connections to create.
+  /// </summary>
   public Connection[]? Connections { get; set; }
 
 

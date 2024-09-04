@@ -4,12 +4,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Mipe.Core.Chains;
 
-public class NoteToControllerMidiChainItem : IMidiChainItem
+public class NoteToProgramChangeChainItem : IMidiChainItem
 {
+  /// <summary>
+  /// Specifies the channel to use. If null, the channel of the incoming message is used.
+  /// </summary>
   public int? Channel { get; set; }
 
-  public int ControllerNumber { get; set; }
-
+  /// <summary>
+  /// Specifies how the program change number should be calculated.
+  /// </summary>
   public NoteToCcValueType Value { get; set; }
 
 
@@ -31,7 +35,10 @@ public class NoteToControllerMidiChainItem : IMidiChainItem
         break;
     }
 
-    var resultMessage = new ChannelMessage(ChannelCommand.Controller, Channel ?? cm.Channel, ControllerNumber, value);
+    var resultMessage = new ChannelMessage(
+      ChannelCommand.Controller,
+      Channel ?? cm.Channel,
+      value);
     return Task.FromResult(new IMidiMessage[] { resultMessage });
   }
 

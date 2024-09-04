@@ -10,20 +10,35 @@ public class Connection
 {
   private InputMidiDevice? _device;
   private string _name = string.Empty;
+  private ILogger? _logger;
 
   [JsonIgnore]
   public bool Connected { get; private set; }
 
-  private ILogger? _logger;
+  /// <summary>
+  /// Specifies if the connection is enabled. Default is true.
+  /// Disabled connections will not be connected.
+  /// </summary>
+  public bool Enabled { get; set; } = true;
 
+  /// <summary>
+  /// An optional name for the connection.
+  /// If no name is given, the input port name will be used.
+  /// </summary>
   public string Name
   {
     get => string.IsNullOrEmpty(_name) ? InputPort : _name;
     set => _name = value;
   }
 
+  /// <summary>
+  /// The name of the input port to connect to.
+  /// </summary>
   public string InputPort { get; set; } = string.Empty;
 
+  /// <summary>
+  /// The chain of items to process the incoming messages.
+  /// </summary>
   public IMidiChainItem[]? Chain { get; set; }
 
 
@@ -43,6 +58,7 @@ public class Connection
 
   public async Task Connect(ILoggerFactory? loggerFactory)
   {
+    if (!Enabled) return;
     if (Connected) return;
     try
     {
@@ -73,6 +89,7 @@ public class Connection
 
   public async Task Disconnect()
   {
+    if (!Enabled) return;
     await Task.WhenAll((Chain ?? []).Select(c => c.Deinitialize()));
     if (_device != null)
     {

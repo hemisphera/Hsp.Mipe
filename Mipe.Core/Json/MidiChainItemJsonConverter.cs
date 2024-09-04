@@ -23,20 +23,23 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
         case ChainItemType.Output:
           result.Add(obj.Deserialize<OutputMidiChainItem>(options));
           break;
-        case ChainItemType.NoteToCc:
-          result.Add(obj.Deserialize<NoteToControllerMidiChainItem>(options));
+        case ChainItemType.NoteToController:
+          result.Add(obj.Deserialize<NoteToControllerChainItem>(options));
           break;
         case ChainItemType.NoteToProgramChange:
-          result.Add(obj.Deserialize<NoteToProgramChangeMidiChainItem>(options));
+          result.Add(obj.Deserialize<NoteToProgramChangeChainItem>(options));
           break;
         case ChainItemType.Filter:
-          result.Add(obj.Deserialize<FilterMidiChainItem>(options));
+          result.Add(obj.Deserialize<FilterChainItem>(options));
           break;
         case ChainItemType.Velocity:
           result.Add(obj.Deserialize<VelocityChainItem>(options));
           break;
         case ChainItemType.Fork:
           result.Add(obj.Deserialize<ForkChainItem>(options));
+          break;
+        case ChainItemType.Dump:
+          result.Add(obj.Deserialize<DumpChainItem>(options));
           break;
         default:
           continue;

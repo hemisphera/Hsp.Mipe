@@ -4,16 +4,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Mipe.Core.Chains;
 
-public class FilterMidiChainItem : IMidiChainItem
+public class FilterChainItem : IMidiChainItem
 {
-  public Range[]? Channel { get; set; }
-
   private ILogger? _logger;
 
+  /// <summary>
+  /// Specifies the channel(s) to allow. If not specified or empty, all channels are allowed.
+  /// </summary>
+  public Range[]? Channel { get; set; }
+
+  /// <summary>
+  /// Specifies the message type(s) to allow. If not specified or empty, all message types are allowed.
+  /// </summary>
   public MidiMessageType[]? MessageType { get; set; }
 
+  /// <summary>
+  /// Specifies the value(s) to allow. If not specified or empty, all values are allowed.
+  /// </summary>
   public Range[]? Data1 { get; set; }
 
+  /// <summary>
+  /// Specifies the value(s) to allow. If not specified or empty, all values are allowed.
+  /// </summary>
   public Range[]? Data2 { get; set; }
 
 

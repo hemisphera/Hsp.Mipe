@@ -5,6 +5,9 @@ namespace Mipe.Core.Chains;
 
 public class ForkChainItem : IMidiChainItem
 {
+  /// <summary>
+  /// The sub-chains to fork the message to.
+  /// </summary>
   public IMidiChainItem[][]? SubChains { get; set; }
 
   public async Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)

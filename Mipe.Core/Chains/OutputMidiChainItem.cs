@@ -6,13 +6,19 @@ namespace Mipe.Core.Chains;
 
 public class OutputMidiChainItem : IMidiChainItem
 {
+  private ILogger? _logger;
+  private OutputMidiDevice? _device;
+
+  /// <summary>
+  /// Specifies the name of the MIDI port to use.
+  /// </summary>
   public string PortName { get; set; } = string.Empty;
 
-  private ILogger? _logger;
-
+  /// <summary>
+  /// Specifies whether to pass the message through to the next chain item, if any.
+  /// </summary>
   public bool PassThrough { get; set; }
 
-  private OutputMidiDevice? _device;
 
   public Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
   {

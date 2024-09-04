@@ -3,9 +3,10 @@
 public enum ChainItemType
 {
   Output,
-  NoteToCc,
+  NoteToController,
   NoteToProgramChange,
   Filter,
   Velocity,
-  Fork
+  Fork,
+  Dump
 }
