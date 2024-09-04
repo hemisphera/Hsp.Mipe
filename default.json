@@ -1,0 +1,23 @@
+{
+    "$schema": "https://raw.githubusercontent.com/hemisphera/MidiProxy/schema/schema.json",
+    "VirtualPorts": [
+        "MIDIproxy Input for APC",
+        "MIDIproxy Output for APC",
+        "MIDIproxy Output 2"
+    ],
+    "Connections": [
+        {
+            "InputPort": "APC64",
+            "Chain": [
+                {
+                    "Type": "Velocity",
+                    "Range": "50..100"
+                },
+                {
+                    "Type": "Output",
+                    "PortName": "MIDIproxy Output 2"
+                }
+            ]
+        }
+    ]
+}
