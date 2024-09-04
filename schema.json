@@ -8,40 +8,110 @@
                 "NoteOn",
                 "NoteOff",
                 "Controller",
-                "ProgramChange"
+                "ProgramChange",
+                "PolyPressure",
+                "ChannelPressure",
+                "PitchWheel",
+                "SysEx"
             ]
+        },
+        "Range": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^[0-9]{1,3}(\\.\\.[0-9]{1,3})?"
+            },
+            "uniqueItems": true
         },
         "ChainItemType": {
             "type": "string",
-            "enum": [
-                "Output",
-                "NoteToCC",
-                "Filter"
+            "anyOf": [
+                {
+                    "const": "Output",
+                    "description": "Output the message to a MIDI port."
+                },
+                {
+                    "const": "NoteToController",
+                    "description": "Convert NoteOn/NoteOff message to controller messages."
+                },
+                {
+                    "const": "NoteToProgramChange",
+                    "description": "Convert NoteOn/NoteOff message to program change messages."
+                },
+                {
+                    "const": "Filter",
+                    "description": "Filter messages."
+                },
+                {
+                    "const": "Fork",
+                    "description": "Multiply messages and send them to multiple sub-chains."
+                },
+                {
+                    "const": "Velocity",
+                    "description": "Modify the velocity of NoteOn/NoteOff messages."
+                },
+                {
+                    "const": "Dump",
+                    "description": "Dump the message to the log output."
+                }
             ]
         },
         "OutputChainItem": {
             "type": "object",
             "properties": {
                 "PortName": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Specifies the name of the MIDI port to use."
+                },
+                "PassThrough": {
+                    "type": "boolean",
+                    "description": "Specifies whether to pass the message through to the next chain item, if any."
                 }
             }
         },
-        "NoteToCCChainItem": {
+        "NoteToControllerChainItem": {
             "type": "object",
             "properties": {
                 "Channel": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 15
+                    "maximum": 15,
+                    "description": "Specifies the channel to use. If null, the channel of the incoming message is used."
                 },
                 "ControllerNumber": {
                     "type": "number",
                     "minimum": 0,
-                    "maximum": 127
+                    "maximum": 127,
+                    "description": "Specifies the controller number to use."
                 },
                 "Value": {
                     "type": "string",
+                    "description": "Specifies how the controller value should be calculated.",
+                    "anyOf": [
+                        {
+                            "const": "NoteNumber",
+                            "description": "Use the MIDI note number as the controller value."
+                        },
+                        {
+                            "const": "Velocity",
+                            "description": "Use the MIDI note velocity as the controller value."
+                        }
+                    ]
+                }
+            }
+        },
+        "NoteToPRogramChangeChainItem": {
+            "type": "object",
+            "properties": {
+                "Channel": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 15,
+                    "description": "Specifies the channel to use. If null, the channel of the incoming message is used."
+                },
+                "Value": {
+                    "type": "string",
+                    "description": "Specifies how the program change number should be calculated.",
                     "anyOf": [
                         {
                             "const": "NoteNumber",
@@ -59,31 +129,60 @@
             "type": "object",
             "properties": {
                 "Channel": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "pattern": "^[0-9]{1,2}(\\.\\.[0-9]{1,2})?"
-                    }
+                    "description": "Specifies the channel(s) to allow. If not specified or empty, all channels are accepted.",
+                    "$ref": "#/definitions/Range"
                 },
                 "MessageType": {
                     "type": "array",
+                    "description": "Specifies the message type(s) to allow. If not specified or empty, all message types are allowed.",
                     "items": {
                         "$ref": "#/definitions/MidiMessageType"
-                    }
+                    },
+                    "uniqueItems": true
                 },
                 "Data1": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "pattern": "^[0-9]{1,3}(\\.\\.[0-9]{1,3})?"
-                    }
+                    "description": "Specifies the value(s) to allow. If not specified or empty, all values are allowed.",
+                    "$ref": "#/definitions/Range"
                 },
                 "Data2": {
+                    "description": "Specifies the value(s) to allow. If not specified or empty, all values are allowed.",
+                    "$ref": "#/definitions/Range"
+                }
+            }
+        },
+        "ForkChainItem": {
+            "type": "object",
+            "properties": {
+                "SubChains": {
                     "type": "array",
+                    "description": "The sub-chains to fork the message to.",
                     "items": {
-                        "type": "string",
-                        "pattern": "^[0-9]{1,3}(\\.\\.[0-9]{1,3})?"
+                        "$ref": "#/definitions/ChainItem"
                     }
+                }
+            }
+        },
+        "VelocityChainItem": {
+            "type": "object",
+            "properties": {
+                "Range": {
+                    "$ref": "#/definitions/Range"
+                },
+                "NoteOn": {
+                    "type": "boolean",
+                    "description": "Specifies whether to apply the range to NoteOn messages."
+                },
+                "NoteOff": {
+                    "type": "boolean",
+                    "description": "Specifies whether to apply the range to NoteOff messages."
+                },
+                "Method": {
+                    "type": "string",
+                    "description": "Specifies the method how the range is applied.",
+                    "enum": [
+                        "Limit",
+                        "Translate"
+                    ]
                 }
             }
         },
@@ -106,31 +205,105 @@
                     "then": {
                         "$ref": "#/definitions/OutputChainItem"
                     }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "NoteToController"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/NoteToControllerChainItem"
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "NoteToProgramChange"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/NoteToProgramChangeChainItem"
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "Filter"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/FilterChainItem"
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "Velocity"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/VelocityChainItem"
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "Fork"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/ForkChainItem"
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "Type": {
+                                "const": "Dump"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/DumpChainItem"
+                    }
                 }
             ]
         }
     },
     "type": "object",
     "properties": {
-        "InputPorts": {
+        "VirtualPorts": {
             "type": "array",
-            "description": "A list of virtual input devices to create.",
-            "items": {
-                "type": "string"
-            }
-        },
-        "OutputPorts": {
-            "type": "array",
-            "description": "A list of virtual output ports to create.",
+            "description": "Specifies a list of virtual MIDI ports to create.",
             "items": {
                 "type": "string"
             }
         },
         "Connections": {
             "type": "array",
+            "description": "Specifies a list of MIDI connections to create.",
             "items": {
                 "type": "object",
                 "properties": {
+                    "Enabled": {
+                        "type": "boolean",
+                        "description": "Specifies if the connection is enabled. Default is true. Disabled connections will not be connected."
+                    },
+                    "Name": {
+                        "type": "string",
+                        "description": "An optional name for the connection. If no name is given, the input port name will be used."
+                    },
                     "InputPort": {
                         "type": "string"
                     },
