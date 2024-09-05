@@ -100,7 +100,7 @@
                 }
             }
         },
-        "NoteToPRogramChangeChainItem": {
+        "NoteToProgramChangeChainItem": {
             "type": "object",
             "properties": {
                 "Channel": {
