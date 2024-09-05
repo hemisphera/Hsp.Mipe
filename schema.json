@@ -186,6 +186,10 @@
                 }
             }
         },
+        "DumpChainItem": {
+            "type": "object",
+            "properties": {}
+        },
         "ChainItem": {
             "type": "object",
             "properties": {
