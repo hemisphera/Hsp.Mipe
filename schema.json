@@ -157,7 +157,10 @@
                     "type": "array",
                     "description": "The sub-chains to fork the message to.",
                     "items": {
-                        "$ref": "#/definitions/ChainItem"
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/ChainItem"
+                        }
                     }
                 }
             }
