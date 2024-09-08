@@ -36,7 +36,7 @@ public class NoteToProgramChangeChainItem : IMidiChainItem
     }
 
     var resultMessage = new ChannelMessage(
-      ChannelCommand.Controller,
+      ChannelCommand.ProgramChange,
       Channel ?? cm.Channel,
       value);
     return Task.FromResult(new IMidiMessage[] { resultMessage });
