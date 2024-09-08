@@ -9,7 +9,8 @@ public sealed class MipeLoader : IAsyncDisposable
   private readonly ILoggerFactory _loggerFactory;
   private readonly ILogger<MipeLoader> _logger;
   private readonly IOptionsMonitor<MipeServiceSettings> _optionsMonitor;
-  private MipeInstance? _instance;
+
+  public MipeInstance? Instance { get; private set; }
 
 
   public MipeLoader(
@@ -45,20 +46,20 @@ public sealed class MipeLoader : IAsyncDisposable
     var val = _optionsMonitor.CurrentValue;
     _logger.LogInformation("Current file is {filePath}", val.ConfigurationFilePath);
 
-    if (_instance != null)
+    if (Instance != null)
     {
       _logger.LogInformation("Stopping active configuration");
-      await _instance.Stop();
-      _instance = null;
+      await Instance.Stop();
+      Instance = null;
     }
 
     try
     {
       _logger.LogInformation("Loading configuration from {path}", val.ConfigurationFilePath);
-      _instance = MipeInstance.Load(val.ConfigurationFilePath);
-      _instance.LoggerFactory = _loggerFactory;
+      Instance = MipeInstance.Load(val.ConfigurationFilePath);
+      Instance.LoggerFactory = _loggerFactory;
       _logger.LogInformation("Starting configuration");
-      await _instance.Start();
+      await Instance.Start();
     }
     catch (Exception ex)
     {
@@ -70,9 +71,9 @@ public sealed class MipeLoader : IAsyncDisposable
 
   public async ValueTask DisposeAsync()
   {
-    if (_instance != null)
+    if (Instance != null)
     {
-      await _instance.Stop();
+      await Instance.Stop();
     }
   }
-} 
+}

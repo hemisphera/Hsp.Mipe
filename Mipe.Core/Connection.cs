@@ -104,11 +104,16 @@ public class Connection
 
   private void DeviceOnMessageReceived(object? sender, IMidiMessage e)
   {
+    Dispatch(e);
+  }
+
+  public void Dispatch(IMidiMessage midiMessage)
+  {
     if (_device != null && _logger?.IsEnabled(LogLevel.Debug) == true)
     {
-      _logger.LogMidi(_device, e);
+      _logger.LogMidi(_device, midiMessage);
     }
 
-    _ = Chain?.Process(e, _logger);
+    _ = Chain?.Process(midiMessage, _logger);
   }
 }
