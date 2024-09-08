@@ -23,6 +23,7 @@ var cachedFileLogger = new CachedFileLoggerProvider("mipe-log.txt");
 
 builder.Services.AddSingleton<MipeLoader>();
 builder.Services.AddSingleton<ILoggerProvider, CachedFileLoggerProvider>(c => cachedFileLogger);
+builder.Services.AddWindowsService();
 
 var app = builder.Build();
 
