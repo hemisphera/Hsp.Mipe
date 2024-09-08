@@ -60,6 +60,9 @@ public class Connection
   {
     if (!Enabled) return;
     if (Connected) return;
+    
+    _logger = loggerFactory?.CreateLogger<Connection>();
+
     try
     {
       ArgumentException.ThrowIfNullOrEmpty(InputPort, nameof(InputPort));
@@ -77,7 +80,6 @@ public class Connection
           throw;
         }
       }));
-      _logger = loggerFactory?.CreateLogger<Connection>();
       Connected = true;
     }
     catch
@@ -97,7 +99,6 @@ public class Connection
       InputMidiDevicePool.Instance.Close(_device);
     }
 
-    _logger = null;
     Connected = false;
   }
 

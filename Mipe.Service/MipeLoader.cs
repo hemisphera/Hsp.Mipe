@@ -12,6 +12,8 @@ public sealed class MipeLoader : IAsyncDisposable
 
   public MipeInstance? Instance { get; private set; }
 
+  public string? CurrentFilePath { get; private set; }
+
 
   public MipeLoader(
     IConfiguration root,
@@ -35,16 +37,20 @@ public sealed class MipeLoader : IAsyncDisposable
       Task.Run(async () =>
       {
         await Task.Delay(TimeSpan.FromSeconds(1));
-        await LoadConfiguration();
+        //await LoadConfiguration();
         Listen();
       });
     }, null);
   }
 
-  public async Task LoadConfiguration()
+  public Task LoadConfiguration()
   {
-    var val = _optionsMonitor.CurrentValue;
-    _logger.LogInformation("Current file is {filePath}", val.ConfigurationFilePath);
+    return LoadConfiguration(CurrentFilePath);
+  }
+
+  public async Task LoadConfiguration(string? filePath)
+  {
+    _logger.LogInformation("Loading file from {filePath}", filePath);
 
     if (Instance != null)
     {
@@ -53,17 +59,20 @@ public sealed class MipeLoader : IAsyncDisposable
       Instance = null;
     }
 
-    try
+    if (!string.IsNullOrEmpty(filePath))
     {
-      _logger.LogInformation("Loading configuration from {path}", val.ConfigurationFilePath);
-      Instance = MipeInstance.Load(val.ConfigurationFilePath);
-      Instance.LoggerFactory = _loggerFactory;
-      _logger.LogInformation("Starting configuration");
-      await Instance.Start();
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, "Failed to load Mipe configuration");
+      try
+      {
+        _logger.LogInformation("Loading configuration from {path}", filePath);
+        Instance = MipeInstance.Load(filePath);
+        Instance.LoggerFactory = _loggerFactory;
+        _logger.LogInformation("Starting configuration");
+        await Instance.Start();
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Failed to load Mipe configuration");
+      }
     }
 
     _logger.LogInformation("Done");

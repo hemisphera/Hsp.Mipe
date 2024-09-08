@@ -34,10 +34,5 @@ app.MapControllers();
 
 app.UseHttpsRedirection();
 
-var loader = app.Services.GetRequiredService<MipeLoader>();
-loader.Listen();
-await loader.LoadConfiguration();
-
-//app.Lifetime.ApplicationStopped.Register(() => { cachedFileLogger.Dispose(); });
-
+await app.Initialize();
 app.Run();
