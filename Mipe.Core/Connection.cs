@@ -1,14 +1,13 @@
 ﻿using System.Text.Json.Serialization;
-using Hsp.Midi;
 using Hsp.Midi.Messages;
 using Microsoft.Extensions.Logging;
 using Mipe.Core.Chains;
+using Mipe.Core.Inputs;
 
 namespace Mipe.Core;
 
 public class Connection
 {
-  private InputMidiDevice? _device;
   private string _name = string.Empty;
   private ILogger? _logger;
 
@@ -32,6 +31,11 @@ public class Connection
   }
 
   /// <summary>
+  /// The input port type to connect to.
+  /// </summary>
+  public InputPortType Type { get; set; }
+
+  /// <summary>
   /// The name of the input port to connect to.
   /// </summary>
   public string InputPort { get; set; } = string.Empty;
@@ -41,6 +45,7 @@ public class Connection
   /// </summary>
   public IMidiChainItem[]? Chain { get; set; }
 
+  public IInputPort? Port { get; private set; }
 
   public async Task<bool> TryConnect(ILoggerFactory? loggerFactory)
   {
@@ -60,14 +65,15 @@ public class Connection
   {
     if (!Enabled) return;
     if (Connected) return;
-    
+
     _logger = loggerFactory?.CreateLogger<Connection>();
+
+    Port = CreatePort();
 
     try
     {
-      ArgumentException.ThrowIfNullOrEmpty(InputPort, nameof(InputPort));
-      _device = InputMidiDevicePool.Instance.Open(InputPort);
-      _device.MessageReceived += DeviceOnMessageReceived;
+      await Port.Connect();
+      Port.MessageReceived += DeviceOnMessageReceived;
       await Task.WhenAll((Chain ?? []).Select(a =>
       {
         try
@@ -89,14 +95,29 @@ public class Connection
     }
   }
 
+  private IInputPort CreatePort()
+  {
+    return Type switch
+    {
+      InputPortType.Midi => new MidiInputPort(InputPort),
+      InputPortType.Serial => new SerialInputPort(InputPort),
+      InputPortType.WebRequest => new WebRequestInputPort(InputPort),
+      _ => throw new ArgumentOutOfRangeException()
+    };
+  }
+
   public async Task Disconnect()
   {
     if (!Enabled) return;
     await Task.WhenAll((Chain ?? []).Select(c => c.Deinitialize()));
-    if (_device != null)
+
+    if (Port != null)
     {
-      _device.MessageReceived -= DeviceOnMessageReceived;
-      InputMidiDevicePool.Instance.Close(_device);
+      Port.MessageReceived -= DeviceOnMessageReceived;
+      await Port.Disconnect();
+      if (Port is IAsyncDisposable iadp) await iadp.DisposeAsync();
+      else if (Port is IDisposable idp) idp.Dispose();
+      Port = null;
     }
 
     Connected = false;
@@ -110,11 +131,12 @@ public class Connection
 
   public void Dispatch(IMidiMessage midiMessage)
   {
+    /*
     if (_device != null && _logger?.IsEnabled(LogLevel.Debug) == true)
     {
       _logger.LogMidi(_device, midiMessage);
     }
-
+    */
     _ = Chain?.Process(midiMessage, _logger);
   }
 }

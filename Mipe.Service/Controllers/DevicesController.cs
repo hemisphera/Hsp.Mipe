@@ -6,7 +6,7 @@ namespace Mipe.Service.Controllers;
 
 [ApiController]
 [Route("devices")]
-public class Devices : ControllerBase
+public class DevicesController : ControllerBase
 {
   [Route("output")]
   [HttpGet]
