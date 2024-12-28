@@ -10,6 +10,6 @@ internal static class LogHelpers
   {
     var direction = device is IInputMidiDevice ? "RX" : "TX";
     var msgType = (message as ChannelMessage)?.Command.ToString() ?? message.GetType().Name;
-    logger.Log(level, "{direction} {port} => {message} {data}", direction, device?.Name, msgType, message.ToHexString());
+    logger.Log(level, "{direction} {port} => {message}", direction, device?.Name, message);
   }
 }

@@ -9,10 +9,12 @@ namespace Mipe.Service.Controllers;
 public class MessageController : ControllerBase
 {
   private readonly MipeLoader _loader;
+  private readonly ILogger<MessageController> _logger;
 
-  public MessageController(MipeLoader loader)
+  public MessageController(MipeLoader loader, ILogger<MessageController> logger)
   {
     _loader = loader;
+    _logger = logger;
   }
 
   [Route("{queueName}")]
@@ -33,6 +35,7 @@ public class MessageController : ControllerBase
 
     foreach (var port in ports)
     {
+      _logger.LogInformation("Posted {} to {}.", midiMessage, port);
       port.RaiseMessageReceived(midiMessage);
     }
 

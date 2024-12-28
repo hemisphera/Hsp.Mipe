@@ -21,7 +21,7 @@ public class InstanceController : ControllerBase
     await loader.LoadConfiguration(null);
   }
 
-  [HttpDelete]
+  [HttpPost]
   public async Task LoadInstance([FromBody] string filePath, MipeLoader loader)
   {
     await loader.LoadConfiguration(filePath);

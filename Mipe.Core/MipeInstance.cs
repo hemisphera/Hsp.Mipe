@@ -60,12 +60,17 @@ public class MipeInstance
         _logger?.LogInformation("Created virtual port '{name}'.", portName);
       }
 
+      var delay = TimeSpan.FromSeconds(2);
+      _logger?.LogInformation("Waiting {delay}s", delay.TotalSeconds);
+      await Task.Delay(delay);
       await Task.WhenAll((Connections ?? []).Select(a => a.TryConnect(LoggerFactory)));
 
       Started = true;
+      _logger?.LogInformation("Connected");
     }
-    catch
+    catch (Exception ex)
     {
+      _logger?.LogError(ex, "Failed to connect.");
       await Stop();
     }
   }
