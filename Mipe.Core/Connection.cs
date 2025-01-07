@@ -47,6 +47,7 @@ public class Connection
 
   public IInputPort? Port { get; private set; }
 
+
   public async Task<bool> TryConnect(ILoggerFactory? loggerFactory)
   {
     try

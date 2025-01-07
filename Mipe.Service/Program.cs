@@ -1,13 +1,23 @@
+using CommandLine;
+using CommandLine.Text;
 using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Primitives;
-using Mipe.Core.FileLogger;
 using Mipe.Service;
 using Mipe.Service.FileLogger;
 
-var builder = WebApplication.CreateBuilder(args);
+var cliParser = new Parser(c => { c.IgnoreUnknownArguments = true; });
+var cliResult = cliParser.ParseArguments<CommandLineArgs>(args);
+if (cliResult.Value == null)
+{
+  Console.WriteLine(HelpText.AutoBuild(cliResult));
+  Environment.Exit(1);
+}
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+  Args = args,
+  ContentRootPath = AppContext.BaseDirectory
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
@@ -17,16 +27,15 @@ foreach (var jsonConfigurationSource in builder.Configuration.Sources.OfType<Jso
   Console.WriteLine(jsonConfigurationSource.Path);
 }
 
-builder.Services.Configure<MipeServiceSettings>(builder.Configuration.GetSection("settings"));
-
 var cachedFileLogger = new CachedFileLoggerProvider("mipe-log.txt");
 
 builder.Services.AddSingleton<MipeLoader>();
-builder.Services.AddSingleton<ILoggerProvider, CachedFileLoggerProvider>(c => cachedFileLogger);
-builder.Services.AddWindowsService();
+builder.Services.AddSingleton<ILoggerProvider, CachedFileLoggerProvider>(_ => cachedFileLogger);
 
 var app = builder.Build();
 
+var loader = app.Services.GetRequiredService<MipeLoader>();
+await loader.LoadConfiguration(cliResult.Value.File);
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -34,5 +43,4 @@ app.MapControllers();
 
 app.UseHttpsRedirection();
 
-await app.Initialize();
 app.Run();
