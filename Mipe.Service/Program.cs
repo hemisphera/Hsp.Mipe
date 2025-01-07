@@ -34,8 +34,18 @@ builder.Services.AddSingleton<ILoggerProvider, CachedFileLoggerProvider>(_ => ca
 
 var app = builder.Build();
 
+var logger = app.Services.GetRequiredService<ILogger<MipeLoader>>();
 var loader = app.Services.GetRequiredService<MipeLoader>();
-await loader.LoadConfiguration(cliResult.Value.File);
+try
+{
+  await loader.LoadConfiguration(cliResult.Value.File);
+}
+catch (Exception ex)
+{
+  logger.LogError(ex, "Loading configuration failed");
+  Environment.Exit(2);
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 

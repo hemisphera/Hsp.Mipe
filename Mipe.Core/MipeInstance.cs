@@ -12,6 +12,7 @@ public class MipeInstance
     Converters =
     {
       new MidiChainItemJsonConverter(),
+      new ChannelMessageJsonConverter(),
       new RangeJsonConverter(),
       new JsonStringEnumConverter()
     }

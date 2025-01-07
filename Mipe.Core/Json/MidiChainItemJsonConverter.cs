@@ -20,6 +20,12 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
 
       switch (type)
       {
+        case ChainItemType.Message:
+          result.Add(obj.Deserialize<MessageMidiChainItem>(options));
+          break;
+        case ChainItemType.Delay:
+          result.Add(obj.Deserialize<DelayMidiChainItem>(options));
+          break;
         case ChainItemType.Output:
           result.Add(obj.Deserialize<OutputMidiChainItem>(options));
           break;
