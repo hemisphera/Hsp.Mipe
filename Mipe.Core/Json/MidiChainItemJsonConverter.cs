@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Hsp.Midi;
 using Mipe.Core.Chains;
 
 namespace Mipe.Core;
@@ -11,48 +12,101 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
   {
     if (JsonNode.Parse(ref reader) is not JsonArray arr) throw new NotSupportedException();
     var result = new List<IMidiChainItem?>();
-    foreach (var obj in arr.OfType<JsonObject>())
+    foreach (var token in arr)
     {
-      if (!Enum.TryParse<ChainItemType>(obj["Type"]?.GetValue<string>(), true, out var type))
+      IMidiChainItem? item = null;
+      if (token is JsonObject jObj)
       {
-        continue;
+        item = ReadChainItemFromObject(jObj, options);
       }
 
-      switch (type)
+      if (token is JsonValue jv && jv.GetValueKind() == JsonValueKind.String)
       {
-        case ChainItemType.Message:
-          result.Add(obj.Deserialize<MessageMidiChainItem>(options));
-          break;
-        case ChainItemType.Delay:
-          result.Add(obj.Deserialize<DelayMidiChainItem>(options));
-          break;
-        case ChainItemType.Output:
-          result.Add(obj.Deserialize<OutputMidiChainItem>(options));
-          break;
-        case ChainItemType.NoteToController:
-          result.Add(obj.Deserialize<NoteToControllerChainItem>(options));
-          break;
-        case ChainItemType.NoteToProgramChange:
-          result.Add(obj.Deserialize<NoteToProgramChangeChainItem>(options));
-          break;
-        case ChainItemType.Filter:
-          result.Add(obj.Deserialize<FilterChainItem>(options));
-          break;
-        case ChainItemType.Velocity:
-          result.Add(obj.Deserialize<VelocityChainItem>(options));
-          break;
-        case ChainItemType.Fork:
-          result.Add(obj.Deserialize<ForkChainItem>(options));
-          break;
-        case ChainItemType.Dump:
-          result.Add(obj.Deserialize<DumpChainItem>(options));
-          break;
-        default:
-          continue;
+        item = ReadChainItemFromString(jv.GetValue<string>());
+      }
+
+      if (item != null)
+      {
+        result.Add(item);
       }
     }
 
     return result.OfType<IMidiChainItem>().ToArray();
+  }
+
+  private static IMidiChainItem? ReadChainItemFromObject(JsonObject obj, JsonSerializerOptions options)
+  {
+    if (!Enum.TryParse<ChainItemType>(obj["Type"]?.GetValue<string>(), true, out var type))
+    {
+      return null;
+    }
+
+    switch (type)
+    {
+      case ChainItemType.Delay:
+        return obj.Deserialize<DelayMidiChainItem>(options);
+      case ChainItemType.Output:
+        return obj.Deserialize<OutputMidiChainItem>(options);
+      case ChainItemType.NoteToController:
+        return obj.Deserialize<NoteToControllerChainItem>(options);
+      case ChainItemType.NoteToProgramChange:
+        return obj.Deserialize<NoteToProgramChangeChainItem>(options);
+      case ChainItemType.Filter:
+        return obj.Deserialize<FilterChainItem>(options);
+      case ChainItemType.Velocity:
+        return obj.Deserialize<VelocityChainItem>(options);
+      case ChainItemType.Fork:
+        return obj.Deserialize<ForkChainItem>(options);
+      case ChainItemType.Dump:
+        return obj.Deserialize<DumpChainItem>(options);
+      case ChainItemType.Message:
+        return obj.Deserialize<MessageMidiChainItem>(options);
+    }
+
+    return null;
+  }
+
+  private static IMidiChainItem? ReadChainItemFromString(string str)
+  {
+    var parts = str.Split(' ');
+    if (!Enum.TryParse<ChainItemType>(parts[0], true, out var type))
+    {
+      return null;
+    }
+
+    switch (type)
+    {
+      case ChainItemType.Dump:
+        return new DumpChainItem();
+      case ChainItemType.Filter:
+        return new FilterChainItem
+        {
+          MessageType = parts[1] == "*" ? null : [Enum.Parse<MidiMessageType>(parts[1])],
+          Channel = parts[2] == "*" ? null : [Range.Parse(parts[2])],
+          Data1 = parts[3] == "*" ? null : [Range.Parse(parts[3])],
+          Data2 = parts[4] == "*" ? null : [Range.Parse(parts[4])]
+        };
+      case ChainItemType.Delay:
+        return new DelayMidiChainItem
+        {
+          Milliseconds = int.Parse(parts[1])
+        };
+      case ChainItemType.Output:
+        return new OutputMidiChainItem
+        {
+          PortName = parts.Length > 1 ? parts[1] : null
+        };
+      case ChainItemType.Message:
+        return new MessageMidiChainItem
+        {
+          Command = parts[1] == "*" ? null : Enum.Parse<ChannelCommand>(parts[1]),
+          Channel = parts[2] == "*" ? null : int.Parse(parts[2]),
+          Data1 = parts[3] == "*" ? null : byte.Parse(parts[3]),
+          Data2 = parts[4] == "*" ? null : byte.Parse(parts[4]),
+        };
+    }
+
+    return null;
   }
 
   public override void Write(Utf8JsonWriter writer, IMidiChainItem[] value, JsonSerializerOptions options)

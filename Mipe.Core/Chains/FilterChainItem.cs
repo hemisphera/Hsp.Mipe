@@ -29,7 +29,7 @@ public class FilterChainItem : IMidiChainItem
   public Range[]? Data2 { get; set; }
 
 
-  public Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
+  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     var messageMatches =
       ChannelMatches(message) &&
@@ -37,7 +37,8 @@ public class FilterChainItem : IMidiChainItem
       Data1Matches(message) &&
       Data2Matches(message);
     _logger?.LogDebug("FilterMidiChainItem: {message} {matches}", message, messageMatches);
-    return Task.FromResult<IMidiMessage[]>(messageMatches ? [message] : []);
+    if (!messageMatches) return;
+    await next(message);
   }
 
   private bool ChannelMatches(IMidiMessage message)
@@ -79,7 +80,7 @@ public class FilterChainItem : IMidiChainItem
     return message is ChannelMessage cm && Data2.Any(r => r.Contains(cm.Data2));
   }
 
-  public Task Initialize(ILogger? logger = null)
+  public Task Initialize(Connection connection, ILogger? logger = null)
   {
     _logger = logger;
     return Task.CompletedTask;

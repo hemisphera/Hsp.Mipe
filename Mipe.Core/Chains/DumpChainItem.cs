@@ -7,13 +7,13 @@ public class DumpChainItem : IMidiChainItem
 {
   private ILogger? _logger;
 
-  public async Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
+  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     _logger?.LogMidi(null, message, LogLevel.Information);
-    return await Task.FromResult(new[] { message });
+    await next(message);
   }
 
-  public Task Initialize(ILogger? logger = null)
+  public Task Initialize(Connection connection, ILogger? logger = null)
   {
     _logger = logger;
     return Task.CompletedTask;

@@ -41,6 +41,11 @@ public class Connection
   public string InputPort { get; set; } = string.Empty;
 
   /// <summary>
+  /// The default output port, if not specified in the chain items.
+  /// </summary>
+  public string? DefaultOutputPort { get; set; }
+
+  /// <summary>
   /// The chain of items to process the incoming messages.
   /// </summary>
   public IMidiChainItem[]? Chain { get; set; }
@@ -79,7 +84,7 @@ public class Connection
       {
         try
         {
-          return a.Initialize(loggerFactory?.CreateLogger(a.GetType()));
+          return a.Initialize(this, loggerFactory?.CreateLogger(a.GetType()));
         }
         catch (Exception ex)
         {
@@ -132,12 +137,7 @@ public class Connection
 
   public void Dispatch(IMidiMessage midiMessage)
   {
-    /*
-    if (_device != null && _logger?.IsEnabled(LogLevel.Debug) == true)
-    {
-      _logger.LogMidi(_device, midiMessage);
-    }
-    */
-    _ = Chain?.Process(midiMessage, _logger);
+    var cr = new ChainRunner(Chain ?? []);
+    _ = cr.Run(midiMessage);
   }
 }

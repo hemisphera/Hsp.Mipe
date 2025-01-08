@@ -5,7 +5,7 @@ namespace Mipe.Core.Chains;
 
 public interface IMidiChainItem
 {
-  Task<IMidiMessage[]> ProcessAsync(IMidiMessage message);
-  Task Initialize(ILogger? logger = null);
+  Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next);
+  Task Initialize(Connection connection, ILogger? logger = null);
   Task Deinitialize();
 }

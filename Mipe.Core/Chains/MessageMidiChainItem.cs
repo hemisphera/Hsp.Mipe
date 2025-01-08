@@ -1,19 +1,38 @@
-﻿using Hsp.Midi.Messages;
+﻿using Hsp.Midi;
+using Hsp.Midi.Messages;
 using Microsoft.Extensions.Logging;
 
 namespace Mipe.Core.Chains;
 
 public class MessageMidiChainItem : IMidiChainItem
 {
-  public ChannelMessage[] Messages { get; set; }
+  public ChannelCommand? Command { get; set; }
+
+  public int? Channel { get; set; }
+
+  public int? Data1 { get; set; }
+
+  public int? Data2 { get; set; }
 
 
-  public async Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
+  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
-    return await Task.FromResult(Messages);
+    if (message is not ChannelMessage cm)
+    {
+      await next(message);
+      return;
+    }
+
+    var newMessage = new ChannelMessage(
+      Command ?? cm.Command,
+      Channel ?? cm.Channel,
+      Data1 ?? cm.Data1,
+      Data2 ?? cm.Data2
+    );
+    await next(newMessage);
   }
 
-  public Task Initialize(ILogger? logger = null)
+  public Task Initialize(Connection connection, ILogger? logger = null)
   {
     return Task.CompletedTask;
   }

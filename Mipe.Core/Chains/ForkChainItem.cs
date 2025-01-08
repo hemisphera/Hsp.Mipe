@@ -10,18 +10,21 @@ public class ForkChainItem : IMidiChainItem
   /// </summary>
   public IMidiChainItem[][]? SubChains { get; set; }
 
-  public async Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
+  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
-    if (SubChains == null || SubChains.Length == 0) return [];
-    await Task.WhenAll(SubChains.Select(subChain => subChain.Process(message)));
-    return [];
+    if (SubChains == null || SubChains.Length == 0) return;
+    await Task.WhenAll(SubChains.Select(async subChain =>
+    {
+      var runner = new ChainRunner(subChain);
+      await runner.Run(message);
+    }));
   }
 
-  public async Task Initialize(ILogger? logger = null)
+  public async Task Initialize(Connection connection, ILogger? logger = null)
   {
     if (SubChains == null || SubChains.Length == 0) return;
     var subchainItems = SubChains.SelectMany(subChain => subChain).ToArray();
-    await Task.WhenAll(subchainItems.Select(subChain => subChain.Initialize(logger)));
+    await Task.WhenAll(subchainItems.Select(subChain => subChain.Initialize(connection, logger)));
   }
 
   public async Task Deinitialize()

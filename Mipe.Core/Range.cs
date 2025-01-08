@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace Mipe.Core;
 
@@ -7,7 +8,12 @@ public class Range
   private static readonly Regex RangeRegex = new(@"^(?<min>\d+)(?:\.\.(?<max>\d+))?$");
 
 
-  public static bool Parse(string str, out Range? range)
+  public static Range Parse(string str)
+  {
+    return TryParse(str, out var range) ? range : throw new FormatException();
+  }
+
+  public static bool TryParse(string str, [NotNullWhen(true)] out Range? range)
   {
     range = null;
     var m = RangeRegex.Match(str);

@@ -12,7 +12,7 @@ public class OutputMidiChainItem : IMidiChainItem
   /// <summary>
   /// Specifies the name of the MIDI port to use.
   /// </summary>
-  public string PortName { get; set; } = string.Empty;
+  public string? PortName { get; set; } = string.Empty;
 
   /// <summary>
   /// Specifies whether to pass the message through to the next chain item, if any.
@@ -20,7 +20,7 @@ public class OutputMidiChainItem : IMidiChainItem
   public bool PassThrough { get; set; }
 
 
-  public Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
+  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     if (_device != null && _logger?.IsEnabled(LogLevel.Debug) == true)
     {
@@ -28,11 +28,13 @@ public class OutputMidiChainItem : IMidiChainItem
     }
 
     _device?.Send(message);
-    return Task.FromResult(PassThrough ? new[] { message } : []);
+    await next(message);
   }
 
-  public Task Initialize(ILogger? logger = null)
+  public Task Initialize(Connection connection, ILogger? logger = null)
   {
+    if (string.IsNullOrEmpty(PortName) && !string.IsNullOrEmpty(connection.DefaultOutputPort))
+      PortName = connection.DefaultOutputPort;
     _device = OutputMidiDevicePool.Instance.Open(PortName);
     return Task.CompletedTask;
   }

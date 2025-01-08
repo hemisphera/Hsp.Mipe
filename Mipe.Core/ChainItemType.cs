@@ -9,6 +9,6 @@ public enum ChainItemType
   Velocity,
   Fork,
   Dump,
-  Message,
-  Delay
+  Delay,
+  Message
 }

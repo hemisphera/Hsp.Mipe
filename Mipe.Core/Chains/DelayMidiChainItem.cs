@@ -8,13 +8,15 @@ public class DelayMidiChainItem : IMidiChainItem
   public int Milliseconds { get; set; }
 
 
-  public async Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
+  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
-    await Task.Delay(TimeSpan.FromMilliseconds(Milliseconds));
-    return [message];
+    var ms = Milliseconds;
+    if (ms > 0)
+      await Task.Delay(TimeSpan.FromMilliseconds(ms));
+    await next(message);
   }
 
-  public Task Initialize(ILogger? logger = null)
+  public Task Initialize(Connection connection, ILogger? logger = null)
   {
     return Task.CompletedTask;
   }

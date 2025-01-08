@@ -22,12 +22,9 @@ public class NoteToControllerChainItem : IMidiChainItem
   public NoteToCcValueType Value { get; set; }
 
 
-  public Task<IMidiMessage[]> ProcessAsync(IMidiMessage message)
+  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
-    if (message is not ChannelMessage cm)
-    {
-      return Task.FromResult(Array.Empty<IMidiMessage>());
-    }
+    if (message is not ChannelMessage cm) return;
 
     var value = 0;
     switch (Value)
@@ -41,10 +38,10 @@ public class NoteToControllerChainItem : IMidiChainItem
     }
 
     var resultMessage = new ChannelMessage(ChannelCommand.Controller, Channel ?? cm.Channel, ControllerNumber, value);
-    return Task.FromResult(new IMidiMessage[] { resultMessage });
+    await next(resultMessage);
   }
 
-  public Task Initialize(ILogger? logger = null)
+  public Task Initialize(Connection connection, ILogger? logger = null)
   {
     return Task.CompletedTask;
   }
