@@ -13,7 +13,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5000",
-      "commandLineArgs": "-f C:\\Repos\\dotNet\\Hsp.MidiProxy\\Mipe.Service\\bin\\Release\\net9.0\\default.json",
+      "commandLineArgs": "-f C:\\Repos\\dotNet\\Hsp.MidiProxy\\Mipe.Service\\v2.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

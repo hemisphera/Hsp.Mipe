@@ -8,7 +8,7 @@ public sealed class MipeLoader : IAsyncDisposable
   private readonly ILogger<MipeLoader> _logger;
 
   public MipeInstance? Instance { get; private set; }
-  public string CurrentFilePath { get; private set; }
+  public string? CurrentFilePath { get; private set; }
 
 
   public MipeLoader(

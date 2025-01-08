@@ -78,6 +78,18 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
     {
       case ChainItemType.Dump:
         return new DumpChainItem();
+      case ChainItemType.NoteToProgramChange:
+        return new NoteToProgramChangeChainItem
+        {
+          Value = Enum.Parse<NoteToCcValueType>(parts[1]),
+          Channel = parts[2] == "*" ? null : int.Parse(parts[2])
+        };
+      case ChainItemType.NoteToController:
+        return new NoteToControllerChainItem
+        {
+          Value = Enum.Parse<NoteToCcValueType>(parts[1]),
+          ControllerNumber = int.Parse(parts[2])
+        };
       case ChainItemType.Filter:
         return new FilterChainItem
         {
