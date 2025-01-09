@@ -15,6 +15,21 @@ public class UnitTest1
   }
 
   [Theory]
+  [InlineData("1 2 3 4 5", 5)]
+  [InlineData("1 '2 3' 4 5 ", 4)]
+  [InlineData("'this is' a 'test string'", 3)]
+  public void Split(string str, int expectedCount)
+  {
+    var parts = str.SplitWithDelimiter();
+    Assert.Equal(expectedCount, parts.Length);
+    Assert.All(parts, part =>
+    {
+      Assert.False(part.EndsWith('\''));
+      Assert.False(part.StartsWith('\''));
+    });
+  }
+
+  [Theory]
   [InlineData("1..10", 1, 10)]
   [InlineData("2..10", 2, 10)]
   [InlineData("2", 2, null)]

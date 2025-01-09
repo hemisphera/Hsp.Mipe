@@ -1,4 +1,4 @@
-﻿namespace Mipe.Core.FileLogger;
+﻿namespace Mipe.Service.FileLogger;
 
 public sealed class LogQueue : IDisposable
 {

@@ -34,7 +34,7 @@
                             "Filter NoteOn * 100 *",
                             "Message NoteOn 0 92 127",
                             "Dump",
-                            "Output",
+                            "Output 'APC 64'",
                             "Delay 1000",
                             "Message NoteOff 0 92 0",
                             "Dump",
