@@ -19,6 +19,7 @@ public sealed class MipeLoader : IAsyncDisposable
     _loggerFactory = loggerFactory;
   }
 
+
   public async Task LoadConfiguration(string? filePath)
   {
     _logger.LogInformation("Loading file from {filePath}", filePath);

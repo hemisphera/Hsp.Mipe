@@ -1,7 +1,6 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Logging;
 
-namespace Mipe.Core.FileLogger;
+namespace Mipe.Service.FileLogger;
 
 public class CachedFileLogger : ILogger
 {

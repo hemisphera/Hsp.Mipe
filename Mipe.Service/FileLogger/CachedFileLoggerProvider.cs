@@ -1,6 +1,4 @@
-﻿using Mipe.Core.FileLogger;
-
-namespace Mipe.Service.FileLogger;
+﻿namespace Mipe.Service.FileLogger;
 
 public sealed class CachedFileLoggerProvider : ILoggerProvider
 {
