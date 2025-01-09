@@ -20,7 +20,7 @@ public class UnitTest1
   [InlineData("2", 2, null)]
   public void ValidRanges(string str, int min, int? max)
   {
-    Range.Parse(str, out var r);
+    Range.TryParse(str, out var r);
     Assert.NotNull(r);
     Assert.Equal(min, r.Minimum);
     Assert.Equal(max, r.Maximum);
@@ -33,7 +33,7 @@ public class UnitTest1
   [InlineData("1..")]
   public void FailedRanges(string str)
   {
-    Range.Parse(str, out var r);
+    Range.TryParse(str, out var r);
     Assert.Null(r);
   }
 
