@@ -1,0 +1,14 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/hemisphera/MidiProxy/mipe/schema.json",
+  "VirtualPorts": [
+    "Timecode Sink"
+  ],
+  "Connections": [
+    {
+      "InputPort": "Timecode Sink",
+      "Chain": [
+        "Clock"
+      ]
+    }
+  ]
+}
