@@ -5,3 +5,4 @@
 .vs
 Mipe.Service/mipe-log.txt
 Mipe.Service/appsettings.Development.json
+*.user
