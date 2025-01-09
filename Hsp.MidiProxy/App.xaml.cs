@@ -1,17 +1,19 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
+using CommandLine;
 using Eos.Mvvm;
 using Eos.Mvvm.DataTemplates;
 using Eos.Mvvm.EventArgs;
-using Hsp.MidiProxy.Configuration;
+using Hsp.MidiProxy.Storage;
+using Hsp.MidiProxy.Views;
 
 namespace Hsp.MidiProxy;
 
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App
 {
   public App()
   {
@@ -20,39 +22,21 @@ public partial class App : Application
 
   protected override void OnStartup(StartupEventArgs e)
   {
-    Configuration.Configuration.Instance.Load();
-    foreach (var pipe in Configuration.Configuration.Instance.Items)
+    var args = Parser.Default.ParseArguments<Arguments>(e.Args).Value;
+    Task.Run(async () =>
     {
-      try
-      {
-        MidiProxy.Main.Instance.Items.Add(new MidiPipeModel(pipe.InputDeviceName, pipe.OutputDeviceName));
-      }
-      catch (Exception ex)
-      {
-        // ignore
-      }
-    }
-  }
-
-  protected override void OnExit(ExitEventArgs e)
-  {
-    Configuration.Configuration.Instance.Items = MidiProxy.Main.Instance
-      .Select(i =>
-      {
-        var inputDeviceName = i.InputDevices.SelectedItem?.Name ?? i.RequestedInputDeviceName;
-        var outputDeviceName = i.OutputDevices.SelectedItem?.Name ?? i.RequesteOutputDeviceName;
-        if (String.IsNullOrEmpty(inputDeviceName) || String.IsNullOrEmpty(outputDeviceName)) return null;
-        return new ConfiguredPipe
-        {
-          InputDeviceName = inputDeviceName,
-          OutputDeviceName = outputDeviceName
-        };
-      }).Where(i => i != null).ToList();
-    Configuration.Configuration.Instance.Save();
+      await MidiProxyPipeList.Instance.Initialize(args);
+      await UiSettings.GetDispatcher().InvokeAsync(() => { ContentHost.Instance.Content = MidiProxyPipeList.Instance; });
+    });
   }
 
   private void InverseBooleanConverter_OnOnConvert(object sender, ConverterEventArgs e)
   {
     e.Result = e.Value is false;
+  }
+
+  protected override void OnExit(ExitEventArgs e)
+  {
+    Configuration.Instance.Save();
   }
 }

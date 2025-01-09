@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using Eos.Mvvm;
 using Hsp.Midi;
 
@@ -8,21 +10,22 @@ namespace Hsp.MidiProxy;
 
 public class MidiDeviceList : AsyncItemsViewModelBase<MidiDeviceInfo>
 {
-
   public bool Input { get; }
 
-  public MidiDeviceList(bool input)
+
+  public static readonly MidiDeviceList InputDevices = new(InputMidiDevicePool.Instance.Enumerate().ToList());
+
+  public static readonly MidiDeviceList OutputDevices = new(OutputMidiDevicePool.Instance.Enumerate().ToList());
+
+
+  private MidiDeviceList(List<MidiDeviceInfo> list)
+    : base(list)
   {
-    Input = input;
   }
 
 
   protected override async Task<IEnumerable<MidiDeviceInfo>> GetItems()
   {
-    if (Input)
-      return await Task.FromResult(InputMidiDevice.Enumerate());
-    else
-      return await Task.FromResult(OutputMidiDevice.Enumerate());
+    return await Task.FromResult(Items);
   }
-
 }

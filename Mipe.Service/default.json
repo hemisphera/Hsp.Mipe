@@ -1,0 +1,80 @@
+{
+    "$schema": "https://raw.githubusercontent.com/hemisphera/MidiProxy/mipe/schema.json",
+    "VirtualPorts": [
+        "Mipe RX for APC",
+        "Mipe TX for APC",
+        "Timecode"
+    ],
+    "Connections": [
+        {
+            "InputPort": "APC64",
+            "Chain": [
+                {
+                    "Type": "Output",
+                    "PortName": "Mipe TX for APC"
+                }
+            ]
+        },
+        {
+            "InputPort": "Mipe RX for APC",
+            "Chain": [
+                {
+                    "Type": "Output",
+                    "PortName": "APC64"
+                }
+            ]
+        },
+        {
+            "Name": "Profiler ProgramChange",
+            "InputPort": "UA-101",
+            "Chain": [
+                {
+                    "Type": "Filter",
+                    "MessageType": [
+                        "NoteOn"
+                    ]
+                },
+                {
+                    "Type": "NoteToProgramChange",
+                    "Value": "NoteNumber"
+                },
+                {
+                    "Type": "Output",
+                    "PortName": "Profiler"
+                }
+            ]
+        },
+        {
+            "Name": "Timecode",
+            "InputPort": "Timecode",
+            "Chain": [
+                {
+                    "Type": "Fork",
+                    "SubChains": [
+                        [
+                            {
+                                "Type": "Output",
+                                "PortName": "Profiler"
+                            }
+                        ],
+                        [
+                            {
+                                "Type": "Output",
+                                "PortName": "Alesis Strike MultiPad"
+                            }
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "InputPort": "Ampero Control",
+            "Chain": [
+                {
+                    "Type": "Output",
+                    "PortName": "Mipe TX for APC"
+                }
+            ]
+        }
+    ]
+}

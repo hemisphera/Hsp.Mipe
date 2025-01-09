@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace Hsp.MidiProxy.Configuration;
+namespace Hsp.MidiProxy.Storage;
 
 public class Configuration
 {
@@ -14,7 +14,9 @@ public class Configuration
   public static Configuration Instance { get; } = new();
 
 
-  public List<ConfiguredPipe> Items { get; set; }
+  public List<StorageMidiProxyPipe> Items { get; set; } = [];
+
+  public bool EnableLogging { get; set; }
 
 
   private Configuration()

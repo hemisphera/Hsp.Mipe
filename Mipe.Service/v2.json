@@ -1,0 +1,58 @@
+{
+    "$schema": "https://raw.githubusercontent.com/hemisphera/MidiProxy/mipe/schema.json",
+    "VirtualPorts": [
+        "Mipe RX for APC",
+        "Mipe TX for APC"
+    ],
+    "Connections": [
+        {
+            "InputPort": "APC64",
+            "Chain": [
+                {
+                    "Type": "Output",
+                    "PortName": "Mipe TX for APC"
+                }
+            ]
+        },
+        {
+            "InputPort": "Mipe RX for APC",
+            "Chain": [
+                {
+                    "Type": "Output",
+                    "PortName": "APC64"
+                }
+            ]
+        },
+        {
+            "InputPort": "Ampero Control",
+            "DefaultOutputPort": "Mipe TX for APC",
+            "Chain": [
+                {
+                    "Type": "Fork",
+                    "SubChains": [
+                        [
+                            "Filter NoteOn * 100 *",
+                            "Message NoteOn 0 92 127",
+                            "Dump",
+                            "Output",
+                            "Delay 1000",
+                            "Message NoteOff 0 92 0",
+                            "Dump",
+                            "Output"
+                        ],
+                        [
+                            "Filter NoteOn * 101 *",
+                            "Message NoteOn 0 92 127",
+                            "Dump",
+                            "Output",
+                            "Delay 1000",
+                            "Message NoteOff 0 92 0",
+                            "Dump",
+                            "Output"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

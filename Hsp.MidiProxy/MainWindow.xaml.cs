@@ -1,19 +1,16 @@
 ﻿using System.Windows;
+using Hsp.MidiProxy.Views;
 
 namespace Hsp.MidiProxy;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window
+public partial class MainWindow
 {
-
-  public Main ViewModel => (Main)DataContext;
-
   public MainWindow()
   {
     InitializeComponent();
-    DataContext = Main.Instance;
+    DataContext = ContentHost.Instance;
   }
-
 }
