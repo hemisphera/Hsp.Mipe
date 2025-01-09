@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hsp.Midi", "..\Hsp.Midi\Hsp.Midi\Hsp.Midi.csproj", "{BE99ED14-05EF-4EA1-A8E8-AA10F7B6A5C3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mipe.Core", "Mipe.Core\Mipe.Core.csproj", "{440CFA7B-0153-45ED-828A-1BF5936ED851}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mipe.Core.Tests", "Mipe.Core.Tests\Mipe.Core.Tests.csproj", "{4A9B39C3-B72C-4208-8CD5-B7ABB32FE17C}"
@@ -14,10 +12,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BE99ED14-05EF-4EA1-A8E8-AA10F7B6A5C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE99ED14-05EF-4EA1-A8E8-AA10F7B6A5C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE99ED14-05EF-4EA1-A8E8-AA10F7B6A5C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE99ED14-05EF-4EA1-A8E8-AA10F7B6A5C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{440CFA7B-0153-45ED-828A-1BF5936ED851}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{440CFA7B-0153-45ED-828A-1BF5936ED851}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{440CFA7B-0153-45ED-828A-1BF5936ED851}.Release|Any CPU.ActiveCfg = Release|Any CPU
