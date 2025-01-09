@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Hsp.Midi;
 using Microsoft.Extensions.Logging;
 
 namespace Mipe.Core;
 
-public class MipeInstance
+public sealed class MipeInstance : IAsyncDisposable
 {
   private static readonly JsonSerializerOptions SerializerOptions = new()
   {
@@ -18,14 +19,16 @@ public class MipeInstance
     }
   };
 
-  [JsonIgnore]
-  public ILoggerFactory? LoggerFactory { get; set; }
+  public MidiClock? Clock { get; }
+
+  public string? CurrentFilePath { get; private set; }
 
   public bool Started { get; private set; }
 
 
   private readonly List<VirtualMidiPort> _virtualPorts = [];
-  private ILogger? _logger;
+  private readonly ILoggerFactory? _loggerFactory;
+  private readonly ILogger _logger;
 
 
   /// <summary>
@@ -39,19 +42,39 @@ public class MipeInstance
   public Connection[]? Connections { get; set; }
 
 
-  public static MipeInstance Load(string? path)
+  public MipeInstance(MidiClock clock, ILoggerFactory loggerFactory)
   {
+    _loggerFactory = loggerFactory;
+    Clock = clock;
+    _logger = _loggerFactory.CreateLogger<MipeInstance>();
+  }
+
+
+  public async Task Load(string? path)
+  {
+    if (Started) throw new InvalidOperationException("Instance is already started.");
+    _logger.LogInformation("Loading configuration from '{path}'.", path);
     ArgumentException.ThrowIfNullOrEmpty(path);
-    using var s = File.OpenRead(path);
-    return
-      JsonSerializer.Deserialize<MipeInstance>(s, SerializerOptions)
-      ?? throw new Exception($"Failed to load configuration from '{path}'.");
+    await using var s = File.OpenRead(path);
+
+    VirtualPorts = [];
+    Connections = [];
+
+    var jo = await JsonNode.ParseAsync(s) as JsonObject;
+    VirtualPorts = jo?[nameof(VirtualPorts)].Deserialize<string[]>(SerializerOptions);
+    Connections = jo?[nameof(Connections)].Deserialize<Connection[]>(SerializerOptions);
+    foreach (var connection in Connections ?? [])
+    {
+      connection.Owner = this;
+    }
+
+    CurrentFilePath = path;
+    _logger.LogInformation("Configuration loaded.");
   }
 
 
   public async Task Start()
   {
-    _logger = LoggerFactory?.CreateLogger<MipeInstance>();
     if (Started) throw new InvalidOperationException();
     try
     {
@@ -61,10 +84,7 @@ public class MipeInstance
         _logger?.LogInformation("Created virtual port '{name}'.", portName);
       }
 
-      var delay = TimeSpan.FromSeconds(2);
-      _logger?.LogInformation("Waiting {delay}s", delay.TotalSeconds);
-      await Task.Delay(delay);
-      await Task.WhenAll((Connections ?? []).Select(a => a.TryConnect(LoggerFactory)));
+      await Task.WhenAll((Connections ?? []).Select(a => a.TryConnect(_loggerFactory)));
 
       Started = true;
       _logger?.LogInformation("Connected");
@@ -86,7 +106,10 @@ public class MipeInstance
       _virtualPorts.Remove(virtualPort);
       _logger?.LogInformation("Removed virtual port '{name}'.", virtualPort.Name);
     }
+  }
 
-    _logger = null;
+  public async ValueTask DisposeAsync()
+  {
+    await Stop();
   }
 }

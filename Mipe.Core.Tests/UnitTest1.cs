@@ -7,13 +7,6 @@ namespace Mipe.Core.Tests;
 
 public class UnitTest1
 {
-  [Fact]
-  public void Test1()
-  {
-    const string filename = @"C:\Repos\dotNet\Hsp.MidiProxy\default.json";
-    var s = MipeInstance.Load(filename);
-  }
-
   [Theory]
   [InlineData("1 2 3 4 5", 5)]
   [InlineData("1 '2 3' 4 5 ", 4)]

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Mipe.Core;
 
 namespace Mipe.Service.Controllers;
 
@@ -6,31 +7,24 @@ namespace Mipe.Service.Controllers;
 [Route("instance")]
 public class InstanceController : ControllerBase
 {
-  private readonly ILogger<InstanceController> _logger;
-
-  public InstanceController(ILogger<InstanceController> logger)
-  {
-    _logger = logger;
-  }
-
   [HttpGet]
-  public IActionResult GetStatus(MipeLoader loader)
+  public IActionResult GetStatus(MipeInstance instance)
   {
     return Ok(new
     {
-      loader.CurrentFilePath
+      instance.CurrentFilePath
     });
   }
 
   [HttpDelete]
-  public async Task ReloadInstance(MipeLoader loader)
+  public async Task ReloadInstance(MipeInstance instance)
   {
-    await loader.LoadConfiguration(null);
+    await instance.Load(null);
   }
 
   [HttpPost]
-  public async Task LoadInstance([FromBody] string filePath, MipeLoader loader)
+  public async Task LoadInstance([FromBody] string filePath, MipeInstance instance)
   {
-    await loader.LoadConfiguration(filePath);
+    await instance.Load(filePath);
   }
 }

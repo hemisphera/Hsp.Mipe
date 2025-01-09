@@ -1,6 +1,7 @@
 using CommandLine;
 using CommandLine.Text;
 using Microsoft.Extensions.Configuration.Json;
+using Mipe.Core;
 using Mipe.Service;
 using Mipe.Service.FileLogger;
 
@@ -29,22 +30,15 @@ foreach (var jsonConfigurationSource in builder.Configuration.Sources.OfType<Jso
 
 var cachedFileLogger = new CachedFileLoggerProvider("mipe-log.txt");
 
-builder.Services.AddSingleton<MipeLoader>();
 builder.Services.AddSingleton<ILoggerProvider, CachedFileLoggerProvider>(_ => cachedFileLogger);
+builder.Services.AddSingleton<MidiClock>();
+builder.Services.AddSingleton<MipeInstance>();
 
 var app = builder.Build();
 
-var logger = app.Services.GetRequiredService<ILogger<MipeLoader>>();
-var loader = app.Services.GetRequiredService<MipeLoader>();
-try
-{
-  await loader.LoadConfiguration(cliResult.Value.File);
-}
-catch (Exception ex)
-{
-  logger.LogError(ex, "Loading configuration failed");
-  Environment.Exit(2);
-}
+var instance = app.Services.GetRequiredService<MipeInstance>();
+await instance.Load(cliResult.Value.File);
+await instance.Start();
 
 app.UseSwagger();
 app.UseSwaggerUI();

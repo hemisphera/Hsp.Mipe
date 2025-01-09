@@ -12,7 +12,8 @@ public class ChannelMessageJsonConverter : JsonConverter<ChannelMessage>
   {
     try
     {
-      var parts = reader.GetString().Split(' ');
+      var parts = reader.GetString()?.Split(' ');
+      if (parts == null) return null;
       var cmd = Enum.Parse<ChannelCommand>(parts[0]);
       var ch = int.Parse(parts[1]);
       var dt1 = byte.Parse(parts[2]);

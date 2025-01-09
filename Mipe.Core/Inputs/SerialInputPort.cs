@@ -8,8 +8,6 @@ internal class SerialInputPort : IInputPort, IDisposable
   private readonly SerialPort _serialPort = new();
   private CancellationTokenSource? _cts;
 
-  private readonly byte[] _buffer = new byte[4];
-
 
   public string PortName { get; }
 
@@ -34,7 +32,7 @@ internal class SerialInputPort : IInputPort, IDisposable
 
     _cts = new CancellationTokenSource();
 
-    Task.Run(() =>
+    _ = Task.Run(() =>
     {
       var token = _cts.Token;
       var buffer = new byte[4];

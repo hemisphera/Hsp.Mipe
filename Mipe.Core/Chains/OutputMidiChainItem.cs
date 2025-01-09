@@ -6,7 +6,6 @@ namespace Mipe.Core.Chains;
 
 public class OutputMidiChainItem : IMidiChainItem
 {
-  private ILogger? _logger;
   private OutputMidiDevice? _device;
 
   /// <summary>
@@ -14,19 +13,9 @@ public class OutputMidiChainItem : IMidiChainItem
   /// </summary>
   public string? PortName { get; set; } = string.Empty;
 
-  /// <summary>
-  /// Specifies whether to pass the message through to the next chain item, if any.
-  /// </summary>
-  public bool PassThrough { get; set; }
-
 
   public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
   {
-    if (_device != null && _logger?.IsEnabled(LogLevel.Debug) == true)
-    {
-      _logger.LogMidi(_device, message);
-    }
-
     _device?.Send(message);
     await next(message);
   }

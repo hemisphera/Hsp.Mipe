@@ -8,8 +8,12 @@ namespace Mipe.Core;
 
 public class Connection
 {
+  public MipeInstance Instance { get; }
   private string _name = string.Empty;
   private ILogger? _logger;
+
+  public MipeInstance? Owner { get; set; }
+
 
   [JsonIgnore]
   public bool Connected { get; private set; }
@@ -53,6 +57,12 @@ public class Connection
   public IInputPort? Port { get; private set; }
 
 
+  public Connection(MipeInstance instance)
+  {
+    Instance = instance;
+  }
+
+
   public async Task<bool> TryConnect(ILoggerFactory? loggerFactory)
   {
     try
@@ -80,11 +90,12 @@ public class Connection
     {
       await Port.Connect();
       Port.MessageReceived += DeviceOnMessageReceived;
-      await Task.WhenAll((Chain ?? []).Select(a =>
+      await Task.WhenAll((Chain ?? []).Select(async a =>
       {
         try
         {
-          return a.Initialize(this, loggerFactory?.CreateLogger(a.GetType()));
+          await a.Initialize(this, loggerFactory?.CreateLogger(a.GetType()));
+          _logger?.LogInformation("Connection '{connectionName}' initialized.", Name);
         }
         catch (Exception ex)
         {

@@ -1,6 +1,7 @@
 ﻿using Hsp.Midi;
 using Hsp.Midi.Messages;
 using Microsoft.AspNetCore.Mvc;
+using Mipe.Core;
 
 namespace Mipe.Service.Controllers;
 
@@ -24,9 +25,9 @@ public class DevicesController : ControllerBase
 
   [Route("input/{name}/{message:int}")]
   [HttpPost]
-  public IActionResult Post([FromRoute] string name, [FromRoute] int message, MipeLoader loader)
+  public IActionResult Post([FromRoute] string name, [FromRoute] int message, MipeInstance instance)
   {
-    var connections = loader.Instance?.Connections?.Where(c => c.InputPort == name && c.Connected);
+    var connections = instance.Connections?.Where(c => c.InputPort == name && c.Connected);
     if (connections == null) return Ok();
 
     var midiMessage = MessageBuilder.Build(message, 0);

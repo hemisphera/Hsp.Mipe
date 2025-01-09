@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Mipe.Core;
 using Mipe.Core.Inputs;
 using Mipe.Service.Models;
 
@@ -8,14 +9,16 @@ namespace Mipe.Service.Controllers;
 [Route("messages")]
 public class MessageController : ControllerBase
 {
-  private readonly MipeLoader _loader;
+  private readonly MipeInstance _instance;
   private readonly ILogger<MessageController> _logger;
 
-  public MessageController(MipeLoader loader, ILogger<MessageController> logger)
+
+  public MessageController(MipeInstance instance, ILogger<MessageController> logger)
   {
-    _loader = loader;
+    _instance = instance;
     _logger = logger;
   }
+
 
   [Route("{queueName}")]
   [HttpPost]
@@ -24,8 +27,7 @@ public class MessageController : ControllerBase
     var midiMessage = message.ToMidiMessage();
     if (midiMessage == null) return BadRequest();
 
-    if (_loader.Instance == null) return NotFound();
-    var ports = _loader.Instance.Connections?
+    var ports = _instance.Connections?
       .Where(c => c.Connected)
       .Select(c => c.Port)
       .OfType<WebRequestInputPort>()
