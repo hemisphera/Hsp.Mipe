@@ -68,7 +68,7 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
 
   private static IMidiChainItem? ReadChainItemFromString(string str)
   {
-    var parts = str.Split(' ');
+    var parts = str.SplitWithDelimiter();
     if (!Enum.TryParse<ChainItemType>(parts[0], true, out var type))
     {
       return null;
