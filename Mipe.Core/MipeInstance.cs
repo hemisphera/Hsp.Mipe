@@ -19,7 +19,7 @@ public sealed class MipeInstance : IAsyncDisposable
     }
   };
 
-  public MidiClock? Clock { get; }
+  public MidiClock? Clock { get; private set; }
 
   public string? CurrentFilePath { get; private set; }
 
@@ -27,7 +27,7 @@ public sealed class MipeInstance : IAsyncDisposable
 
 
   private readonly List<VirtualMidiPort> _virtualPorts = [];
-  private readonly ILoggerFactory? _loggerFactory;
+  private readonly ILoggerFactory _loggerFactory;
   private readonly ILogger _logger;
 
 
@@ -41,11 +41,12 @@ public sealed class MipeInstance : IAsyncDisposable
   /// </summary>
   public Connection[]? Connections { get; set; }
 
+  public string? ClockInputDevice { get; private set; }
 
-  public MipeInstance(MidiClock clock, ILoggerFactory loggerFactory)
+
+  public MipeInstance(ILoggerFactory loggerFactory)
   {
     _loggerFactory = loggerFactory;
-    Clock = clock;
     _logger = _loggerFactory.CreateLogger<MipeInstance>();
   }
 
@@ -63,6 +64,8 @@ public sealed class MipeInstance : IAsyncDisposable
     var jo = await JsonNode.ParseAsync(s) as JsonObject;
     VirtualPorts = jo?[nameof(VirtualPorts)].Deserialize<string[]>(SerializerOptions);
     Connections = jo?[nameof(Connections)].Deserialize<Connection[]>(SerializerOptions);
+    ClockInputDevice = jo?[nameof(ClockInputDevice)].Deserialize<string>(SerializerOptions);
+
     foreach (var connection in Connections ?? [])
     {
       connection.Owner = this;
@@ -84,6 +87,11 @@ public sealed class MipeInstance : IAsyncDisposable
         _logger?.LogInformation("Created virtual port '{name}'.", portName);
       }
 
+      if (!string.IsNullOrEmpty(ClockInputDevice))
+      {
+        Clock = new MidiClock(ClockInputDevice, _loggerFactory.CreateLogger<MidiClock>());
+      }
+
       await Task.WhenAll((Connections ?? []).Select(a => a.TryConnect(_loggerFactory)));
 
       Started = true;
@@ -98,6 +106,9 @@ public sealed class MipeInstance : IAsyncDisposable
 
   public async Task Stop()
   {
+    Clock?.Dispose();
+    Clock = null;
+
     await Task.WhenAll((Connections ?? []).Select(a => a.Disconnect()));
 
     foreach (var virtualPort in _virtualPorts.ToArray())

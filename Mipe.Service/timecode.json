@@ -3,12 +3,5 @@
   "VirtualPorts": [
     "Timecode Sink"
   ],
-  "Connections": [
-    {
-      "InputPort": "Timecode Sink",
-      "Chain": [
-        "Clock"
-      ]
-    }
-  ]
+  "ClockInputDevice": "Timecode Sink"
 }

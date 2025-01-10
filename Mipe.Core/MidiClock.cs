@@ -1,55 +1,73 @@
 ﻿using System.Diagnostics;
+using Hsp.Midi;
+using Hsp.Midi.Messages;
 using Microsoft.Extensions.Logging;
+using Mipe.Core.Inputs;
 
 namespace Mipe.Core;
 
-public class MidiClock
+public sealed class MidiClock : IDisposable
 {
+  private readonly InputMidiDevice _input;
   private readonly ILogger _logger;
   private const byte TicksPerQuarterNote = 24;
 
-
   private byte _remainingTicks = TicksPerQuarterNote;
-  private int _counter;
-  private long _lastTick;
+  private readonly Stopwatch _sw = new();
 
-  public double Bpm { get; private set; }
-
-  public int Counter
+  public double Bpm
   {
-    get => _counter;
-    private set
+    get
     {
-      var newTick = Stopwatch.GetTimestamp();
-      var diff = newTick - _lastTick;
-      Bpm = 30 / (diff / (double)Stopwatch.Frequency);
-      _lastTick = newTick;
-      _counter = value;
+      if (Counter == 0) return 0;
+      var secPerBeat = _sw.ElapsedMilliseconds / 1000.0 / Counter;
+      return 30.0 / secPerBeat;
     }
   }
+
+  public int Counter { get; private set; }
 
 
   public event EventHandler? OnQuarterNote;
 
 
-  public MidiClock(ILogger<MidiClock> logger)
+  public MidiClock(string input, ILogger<MidiClock> logger)
+    : this(InputMidiDevicePool.Instance.Open(input), logger)
   {
+  }
+
+  public MidiClock(InputMidiDevice input, ILogger<MidiClock> logger)
+  {
+    _input = input;
     _logger = logger;
+    _input.MessageReceived += OnMessageReceived;
+  }
+
+
+  private void OnMessageReceived(object? sender, IMidiMessage e)
+  {
+    if (e is SysRealtimeMessage { SysRealtimeType: SysRealtimeType.Start })
+      Start();
+    if (e is SysRealtimeMessage { SysRealtimeType: SysRealtimeType.Stop })
+      Stop();
+    if (e is SysRealtimeMessage { SysRealtimeType: SysRealtimeType.Clock })
+      Tick();
   }
 
   public void Start()
   {
     _remainingTicks = TicksPerQuarterNote;
+    _sw.Reset();
+    _sw.Start();
     Counter = 0;
-    Bpm = 0;
     Task.Run(() => { _logger.LogInformation("start"); });
   }
 
   public void Stop()
   {
     _remainingTicks = TicksPerQuarterNote;
+    _sw.Stop();
     Counter = 0;
-    Bpm = 0;
     Task.Run(() => { _logger.LogInformation("stop"); });
   }
 
@@ -65,5 +83,11 @@ public class MidiClock
       _logger.LogInformation("tick: {ctr} @ {bpm}bpm", Counter, Bpm);
       OnQuarterNote?.Invoke(this, EventArgs.Empty);
     });
+  }
+
+  public void Dispose()
+  {
+    _input.MessageReceived -= OnMessageReceived;
+    InputMidiDevicePool.Instance.Close(_input);
   }
 }

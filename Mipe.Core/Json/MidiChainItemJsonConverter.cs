@@ -61,8 +61,6 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
         return obj.Deserialize<DumpChainItem>(options);
       case ChainItemType.Message:
         return obj.Deserialize<MessageMidiChainItem>(options);
-      case ChainItemType.Clock:
-        return obj.Deserialize<ClockMidiChainItem>(options);
     }
 
     return null;
@@ -105,8 +103,6 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
         {
           Milliseconds = int.Parse(parts[1])
         };
-      case ChainItemType.Clock:
-        return new ClockMidiChainItem();
       case ChainItemType.Output:
         return new OutputMidiChainItem
         {

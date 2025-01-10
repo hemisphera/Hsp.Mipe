@@ -31,7 +31,6 @@ foreach (var jsonConfigurationSource in builder.Configuration.Sources.OfType<Jso
 var cachedFileLogger = new CachedFileLoggerProvider("mipe-log.txt");
 
 builder.Services.AddSingleton<ILoggerProvider, CachedFileLoggerProvider>(_ => cachedFileLogger);
-builder.Services.AddSingleton<MidiClock>();
 builder.Services.AddSingleton<MipeInstance>();
 
 var app = builder.Build();
