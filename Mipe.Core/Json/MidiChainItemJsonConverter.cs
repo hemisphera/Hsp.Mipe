@@ -61,6 +61,12 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
         return obj.Deserialize<DumpChainItem>(options);
       case ChainItemType.Message:
         return obj.Deserialize<MessageMidiChainItem>(options);
+      case ChainItemType.Read:
+        return obj.Deserialize<ReadValueChainItem>(options);
+      case ChainItemType.Write:
+        return obj.Deserialize<WriteValueChainItem>(options);
+      case ChainItemType.Modify:
+        return obj.Deserialize<ModifyChainItem>(options);
     }
 
     return null;
@@ -115,6 +121,27 @@ public class MidiChainItemJsonConverter : JsonConverter<IMidiChainItem[]>
           Channel = parts[2] == "*" ? null : int.Parse(parts[2]),
           Data1 = parts[3] == "*" ? null : byte.Parse(parts[3]),
           Data2 = parts[4] == "*" ? null : byte.Parse(parts[4]),
+        };
+      case ChainItemType.Read:
+        return new ReadValueChainItem
+        {
+          VariableName = parts[1],
+          Type = Enum.Parse<ValueType>(parts[2]),
+          InitValue = byte.Parse(parts[3])
+        };
+      case ChainItemType.Write:
+        return new WriteValueChainItem
+        {
+          VariableName = parts[1],
+          Type = Enum.Parse<ValueType>(parts[2])
+        };
+      case ChainItemType.Modify:
+        return new ModifyChainItem
+        {
+          Type = Enum.Parse<ValueType>(parts[1]),
+          Expression = parts[2],
+          MinValue = parts.Length >= 4 ? int.Parse(parts[3]) : 0,
+          MaxValue = parts.Length >= 5 ? int.Parse(parts[4]) : 127
         };
     }
 

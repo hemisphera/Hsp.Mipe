@@ -10,5 +10,8 @@ public enum ChainItemType
   Fork,
   Dump,
   Delay,
-  Message
+  Message,
+  Read,
+  Write,
+  Modify
 }
