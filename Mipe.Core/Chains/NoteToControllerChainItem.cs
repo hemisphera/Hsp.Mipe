@@ -22,7 +22,7 @@ public class NoteToControllerChainItem : IMidiChainItem
   public NoteToCcValueType Value { get; set; }
 
 
-  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
+  public async Task ProcessAsync(Connection connection, IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     if (message is not ChannelMessage cm) return;
 

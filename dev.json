@@ -1,0 +1,35 @@
+{
+    "$schema": "https://raw.githubusercontent.com/hemisphera/MidiProxy/schema/schema.json",
+    "Connections": [
+        {
+            "InputPort": "loopMIDI Port",
+            "Chain": [
+                {
+                    "Type": "Fork",
+                    "SubChains": [
+                        [
+                            "Filter NoteOn * 50 *",
+                            "Read SCENE Data1 100",
+                            "Modify Data1 +1 100 110",
+                            "Write SCENE Data1",
+                            "Dump",
+                            "Delay 100",
+                            "Read null Command 128",
+                            "Dump"
+                        ],
+                        [
+                            "Filter NoteOn * 48 *",
+                            "Read SCENE Data1 100",
+                            "Modify Data1 -1 100 110",
+                            "Write SCENE Data1",
+                            "Dump",
+                            "Delay 100",
+                            "Read null Command 128",
+                            "Dump"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

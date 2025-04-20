@@ -10,12 +10,12 @@ public class ForkChainItem : IMidiChainItem
   /// </summary>
   public IMidiChainItem[][]? SubChains { get; set; }
 
-  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
+  public async Task ProcessAsync(Connection connection, IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     if (SubChains == null || SubChains.Length == 0) return;
     await Task.WhenAll(SubChains.Select(async subChain =>
     {
-      var runner = new ChainRunner(subChain);
+      var runner = new ChainRunner(connection, subChain);
       await runner.Run(message);
     }));
   }

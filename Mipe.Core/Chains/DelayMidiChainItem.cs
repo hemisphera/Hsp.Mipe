@@ -8,7 +8,7 @@ public class DelayMidiChainItem : IMidiChainItem
   public int Milliseconds { get; set; }
 
 
-  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
+  public async Task ProcessAsync(Connection connection, IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     var ms = Milliseconds;
     if (ms > 0)

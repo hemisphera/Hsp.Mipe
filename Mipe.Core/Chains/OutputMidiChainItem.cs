@@ -20,7 +20,7 @@ public class OutputMidiChainItem : IMidiChainItem
   public bool PassThrough { get; set; }
 
 
-  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
+  public async Task ProcessAsync(Connection connection, IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     if (_device != null && _logger?.IsEnabled(LogLevel.Debug) == true)
     {

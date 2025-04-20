@@ -6,11 +6,13 @@ namespace Mipe.Core;
 
 internal class ChainRunner
 {
+  private readonly Connection _conn;
   private readonly IMidiChainItem[] _chain;
 
 
-  public ChainRunner(IEnumerable<IMidiChainItem> chain)
+  public ChainRunner(Connection conn, IEnumerable<IMidiChainItem> chain)
   {
+    _conn = conn;
     _chain = chain.ToArray();
   }
 
@@ -22,12 +24,12 @@ internal class ChainRunner
     var item = _chain.First();
     var nextChain = _chain.Skip(1).ToArray();
 
-    await item.ProcessAsync(msg, NextFunc);
+    await item.ProcessAsync(_conn, msg, NextFunc);
     return;
 
     async Task NextFunc(IMidiMessage nextMsg)
     {
-      var cr = new ChainRunner(nextChain);
+      var cr = new ChainRunner(_conn, nextChain);
       await cr.Run(nextMsg);
     }
   }

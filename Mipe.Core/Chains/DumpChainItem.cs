@@ -1,5 +1,6 @@
 ﻿using Hsp.Midi.Messages;
 using Microsoft.Extensions.Logging;
+using Mipe.Core.Inputs;
 
 namespace Mipe.Core.Chains;
 
@@ -7,9 +8,9 @@ public class DumpChainItem : IMidiChainItem
 {
   private ILogger? _logger;
 
-  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
+  public async Task ProcessAsync(Connection connection, IMidiMessage message, Func<IMidiMessage, Task> next)
   {
-    _logger?.LogMidi(null, message, LogLevel.Information);
+    _logger?.LogMidi((connection.Port as MidiInputPort)?.Device, message, LogLevel.Information);
     await next(message);
   }
 

@@ -29,7 +29,7 @@ public class FilterChainItem : IMidiChainItem
   public Range[]? Data2 { get; set; }
 
 
-  public async Task ProcessAsync(IMidiMessage message, Func<IMidiMessage, Task> next)
+  public async Task ProcessAsync(Connection connection, IMidiMessage message, Func<IMidiMessage, Task> next)
   {
     var messageMatches =
       ChannelMatches(message) &&

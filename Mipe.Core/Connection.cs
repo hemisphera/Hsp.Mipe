@@ -137,7 +137,7 @@ public class Connection
 
   public void Dispatch(IMidiMessage midiMessage)
   {
-    var cr = new ChainRunner(Chain ?? []);
+    var cr = new ChainRunner(this, Chain ?? []);
     _ = cr.Run(midiMessage);
   }
 }

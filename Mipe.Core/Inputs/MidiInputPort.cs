@@ -5,7 +5,7 @@ namespace Mipe.Core.Inputs;
 
 public class MidiInputPort : IInputPort
 {
-  private InputMidiDevice? _device;
+  public InputMidiDevice? Device { get; private set; }
   public string PortName { get; }
 
 
@@ -21,8 +21,8 @@ public class MidiInputPort : IInputPort
   public async Task Connect()
   {
     ArgumentException.ThrowIfNullOrEmpty(PortName, nameof(PortName));
-    _device = InputMidiDevicePool.Instance.Open(PortName);
-    _device.MessageReceived += DeviceOnMessageReceived;
+    Device = InputMidiDevicePool.Instance.Open(PortName);
+    Device.MessageReceived += DeviceOnMessageReceived;
     await Task.CompletedTask;
   }
 
@@ -33,8 +33,8 @@ public class MidiInputPort : IInputPort
 
   public async Task Disconnect()
   {
-    if (_device == null) return;
-    InputMidiDevicePool.Instance.Close(_device);
+    if (Device == null) return;
+    InputMidiDevicePool.Instance.Close(Device);
     await Task.CompletedTask;
   }
 }
